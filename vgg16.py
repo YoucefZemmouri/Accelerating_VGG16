@@ -1,18 +1,5 @@
-########################################################################################
-# Davi Frossard, 2016                                                                  #
-# VGG16 implementation in TensorFlow                                                   #
-# Details:                                                                             #
-# http://www.cs.toronto.edu/~frossard/post/vgg16/                                      #
-#                                                                                      #
-# Model from https://gist.github.com/ksimonyan/211839e770f7b538e2d8#file-readme-md     #
-# Weights from Caffe converted using https://github.com/ethereon/caffe-tensorflow      #
-########################################################################################
-
 import tensorflow as tf
 import numpy as np
-from scipy.misc import imread, imresize
-from imagenet_classes import class_names
-import time
 
 class vgg16:
     def __init__(self, imgs, weights=None, sess=None):
@@ -30,6 +17,7 @@ class vgg16:
         with tf.name_scope('preprocess') as scope:
             mean = tf.constant([123.68, 116.779, 103.939], dtype=tf.float32, shape=[1, 1, 1, 3], name='img_mean')
             images = self.imgs - mean
+            print('shape image', images.shape)
 
         # conv1_1
         with tf.name_scope('conv1_1') as scope:
@@ -250,19 +238,3 @@ class vgg16:
         for i, k in enumerate(keys):
             print(i, k, np.shape(weights[k]))
             sess.run(self.parameters[i].assign(weights[k]))
-
-
-if __name__ == '__main__':
-    t1 = time.time()
-    sess = tf.Session()
-    imgs = tf.placeholder(tf.float32, [None, 224, 224, 3])
-    vgg = vgg16(imgs, 'vgg16_weights.npz', sess)
-
-    img1 = imread('laska.png', mode='RGB')
-    img1 = imresize(img1, (224, 224))
-
-    prob = sess.run(vgg.probs, feed_dict={vgg.imgs: [img1]})[0]
-    preds = (np.argsort(prob)[::-1])[0:5]
-    for p in preds:
-        print(class_names[p], prob[p])
-    print('rotate en:', time.time()-t1, 'secondes')
