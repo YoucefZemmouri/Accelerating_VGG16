@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib.pyplot as plt
 
 def LinearCase(Outputs, W_w, W_b, d_prime):
     k = W_w.shape[0]
@@ -28,3 +29,21 @@ def LinearCase(Outputs, W_w, W_b, d_prime):
     weight_conv2_b = b
     
     return weight_conv1_W, weight_conv1_b, weight_conv2_W, weight_conv2_b
+
+def PCA_Energy(Outputs):
+    n = Outputs[0].shape[0]
+    d = Outputs[0].shape[2]
+
+    Y = Outputs[0].reshape(n*n,d).transpose()
+    for i in range(1,len(Outputs)):
+        Y = np.concatenate((Y,Outputs[i].reshape(n*n,d).transpose()),axis=1)
+    Y_bar = np.mean(Y,axis=1,keepdims=True)
+    Y = Y - Y_bar
+
+    Cov = Y.dot(Y.transpose())
+    w, v = np.linalg.eig(Cov)
+
+    plt.figure()
+    plt.xlabel("d'")
+    plt.ylabel("PCA Accumulative Energy (%)")
+    plt.plot((w/w.sum()*100).cumsum())
